@@ -17,6 +17,10 @@ interface User {
   profile_image_url: string;
 }
 
+interface ResponseUser {
+  data: User[];
+}
+
 interface AuthContextData {
   user: User;
   isLoggingOut: boolean;
@@ -42,7 +46,6 @@ function AuthProvider({ children }: AuthProviderData) {
   const [user, setUser] = useState({} as User);
   const [userToken, setUserToken] = useState('');
 
-  // get CLIENT_ID from environment variables
   const { CLIENT_ID } = process.env;
 
   async function signIn() {
@@ -75,8 +78,10 @@ function AuthProvider({ children }: AuthProviderData) {
         api.defaults.headers.authorization = `Bearer ${authResponse.params.access_token}`;
 
         const {
-          data: { id, display_name, email, profile_image_url },
-        } = await api.get<User>('/users');
+          data: {
+            data: [{ id, display_name, email, profile_image_url }],
+          },
+        } = await api.get<ResponseUser>('/users');
 
         setUser({
           id,
